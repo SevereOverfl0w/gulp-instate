@@ -4,11 +4,15 @@ var gulp = require('gulp'),
     compass = require('gulp-compass'),
     coffee = require('gulp-coffee'),
     gutil = require('gulp-util'),
-    prefix = require('gulp-autoprefixer');
+    prefix = require('gulp-autoprefixer'),
+    useref = require('gulp-useref'),
+    gulpif = require('gulp-if'),
+    uglify = require('gulp-uglify'),
+    minifyCss = require('gulp-minify-css');
 
 gulp.task('connect', function() {
     connect.server({
-        root: 'app',
+        root: '.tmp',
         livereload: true,
     });
 });
@@ -16,7 +20,7 @@ gulp.task('connect', function() {
 gulp.task('html', function() {
     gulp.src('./app/**/*.html')
         .pipe(wiredep())
-        .pipe(gulp.dest('./app'))
+        .pipe(gulp.dest('./.tmp'))
         .pipe(connect.reload());
 });
 
@@ -28,13 +32,13 @@ gulp.task('compass', function() {
             image: 'app/images'
         }))
         .on('error', gutil.log)
-        .pipe(gulp.dest('./app'));
+        .pipe(gulp.dest('./.tmp'));
 });
 
 gulp.task('css', function() {
-    gulp.src('./app/**/*.css')
+    gulp.src('./.tmp/**/*.css')
         .pipe(prefix())
-        .pipe(gulp.dest('./app'))
+        .pipe(gulp.dest('./.tmp'))
         .pipe(connect.reload());
 });
 
@@ -42,26 +46,26 @@ gulp.task('coffee', function() {
     gulp.src('./app/**/*.coffee')
         .pipe(coffee({bare: true}))
         .on('error', gutil.log)
-        .pipe(gulp.dest('./app'))
+        .pipe(gulp.dest('./.tmp'))
 });
 
 gulp.task('js', function() {
-    gulp.src('./app/**/*.js')
+    gulp.src('./.tmp/**/*.js')
         .pipe(connect.reload());
 });
 
 gulp.task('bower', function() {
     gulp.src(['**/*.html', '**/*.scss'], {cwd: './app'})
         .pipe(wiredep())
-        .pipe(gulp.dest('./app/'));
+        .pipe(gulp.dest('./.tmp/'));
 });
 
 gulp.task('watch', function() {
     gulp.watch(['./app/**/*.html'], ['html']);
     gulp.watch(['./app/**/*.scss'], ['compass']);
-    gulp.watch(['./app/**/*.css'], ['css']);
+    gulp.watch(['./.tmp/**/*.css'], ['css']);
     gulp.watch(['./app/**/*.coffee'], ['coffee']);
-    gulp.watch(['./app/**/*.js'], ['js']);
+    gulp.watch(['./.tmp/**/*.js'], ['js']);
 
     gulp.watch(['./bower.json'], ['bower']);
 });
