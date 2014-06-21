@@ -8,11 +8,12 @@ var gulp = require('gulp'),
     useref = require('gulp-useref'),
     gulpif = require('gulp-if'),
     uglify = require('gulp-uglify'),
-    minifyCss = require('gulp-minify-css');
+    minifyCss = require('gulp-minify-css'),
+    clean = require('gulp-clean');
 
 gulp.task('connect', function() {
     connect.server({
-        root: '.tmp',
+        root: './.tmp',
         livereload: true,
     });
 });
@@ -24,7 +25,7 @@ gulp.task('html', function() {
         .pipe(connect.reload());
 });
 
-gulp.task('compass', function() {
+gulp.task('compass', ['clean'], function() {
     gulp.src('./app/**/*.scss')
         .pipe(compass({
             css: 'app/styles',
@@ -42,7 +43,7 @@ gulp.task('css', function() {
         .pipe(connect.reload());
 });
 
-gulp.task('coffee', function() {
+gulp.task('coffee', ['clean'], function() {
     gulp.src('./app/**/*.coffee')
         .pipe(coffee({bare: true}))
         .on('error', gutil.log)
@@ -54,7 +55,7 @@ gulp.task('js', function() {
         .pipe(connect.reload());
 });
 
-gulp.task('bower', function() {
+gulp.task('bower', ['clean'], function() {
     gulp.src(['**/*.html', '**/*.scss'], {cwd: './app'})
         .pipe(wiredep())
         .pipe(gulp.dest('./.tmp/'));
@@ -70,4 +71,24 @@ gulp.task('watch', function() {
     gulp.watch(['./bower.json'], ['bower']);
 });
 
-gulp.task('default', ['connect', 'bower', 'compass', 'coffee', 'watch']);
+gulp.task('clean', function() {
+    return gulp.src('{.tmp,dist}', {read: false})
+               .pipe(clean());
+});
+
+gulp.task('first_round', function() {
+    return gulp.start('bower', 'compass', 'coffee');
+});
+gulp.task('default', ['connect', 'first_round', 'watch']);
+
+gulp.task('htmlmin', ['first_round'], function() {
+    return gulp.src('**/*.html', {cwd: './.tmp'})
+               .pipe(useref.assets())
+               .pipe(gulpif('*.js', uglify()))
+               .pipe(gulpif('*.css', minifyCss()))
+               .pipe(useref.restore())
+               .pipe(useref())
+               .pipe(gulp.dest('./dist'));
+});
+
+gulp.task('build', ['htmlmin']);
