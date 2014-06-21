@@ -1,0 +1,11 @@
+/* line 4, main.scss */
+h1, h2, h3, h4, h5, h6 {
+  font-family: sans-serif;
+}
+
+/* line 8, main.scss */
+* {
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  box-sizing: border-box;
+}

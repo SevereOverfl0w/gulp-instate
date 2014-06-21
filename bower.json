@@ -1,0 +1,18 @@
+{
+  "name": "gulp-instate",
+  "version": "0.0.0",
+  "authors": [
+    "SevereOverfl0w <overfl0w@narna.co>"
+  ],
+  "description": "A kick-starter for Gulp",
+  "license": "MIT",
+  "private": true,
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {}
+}
