@@ -1,19 +1,9 @@
 var gulp = require('gulp'),
-    connect = require('gulp-connect'),
-    wiredep = require('wiredep').stream,
-    compass = require('gulp-compass'),
-    coffee = require('gulp-coffee'),
-    gutil = require('gulp-util'),
-    prefix = require('gulp-autoprefixer'),
-    usemin = require('gulp-usemin'),
-    uglify = require('gulp-uglify'),
-    minifyCss = require('gulp-minify-css'),
-    minifyHtml = require('gulp-minify-html'),
-    rev = require('gulp-rev'),
-    clean = require('gulp-clean');
+    $ = require('gulp-load-plugins')(),
+    wiredep = require('wiredep').stream;
 
 gulp.task('connect', function() {
-    connect.server({
+    $.connect.server({
         root: './.tmp',
         livereload: true,
     });
@@ -22,37 +12,37 @@ gulp.task('connect', function() {
 gulp.task('html', ['bower', 'clean'], function() {
     return gulp.src('./app/**/*.html')
         .pipe(gulp.dest('./.tmp'))
-        .pipe(connect.reload());
+        .pipe($.connect.reload());
 });
 
 gulp.task('compass', ['bower', 'clean'], function() {
     return gulp.src('./app/**/*.scss')
-        .pipe(compass({
+        .pipe($.compass({
             css: 'app/styles',
             sass: 'app/styles',
             image: 'app/images'
         }))
-        .on('error', gutil.log)
+        .on('error', $.util.log)
         .pipe(gulp.dest('./.tmp'));
 });
 
 gulp.task('css', function() {
     gulp.src('./.tmp/**/*.css')
-        .pipe(prefix())
+        .pipe($.autoprefixer())
         .pipe(gulp.dest('./.tmp'))
-        .pipe(connect.reload());
+        .pipe($.connect.reload());
 });
 
 gulp.task('coffee', ['clean'], function() {
     return gulp.src('./app/**/*.coffee')
-        .pipe(coffee({bare: true}))
-        .on('error', gutil.log)
+        .pipe($.coffee({bare: true}))
+        .on('error', $.util.log)
         .pipe(gulp.dest('./.tmp'))
 });
 
 gulp.task('js', function() {
     gulp.src('./.tmp/**/*.js')
-        .pipe(connect.reload());
+        .pipe($.connect.reload());
 });
 
 gulp.task('bower', function() {
@@ -73,7 +63,7 @@ gulp.task('watch', function() {
 
 gulp.task('clean', function() {
     return gulp.src('{.tmp,dist}', {read: false})
-               .pipe(clean());
+               .pipe($.clean());
 });
 
 gulp.task('first_round', ['bower', 'html', 'compass', 'coffee']);
@@ -82,10 +72,10 @@ gulp.task('default', ['connect', 'first_round', 'watch']);
 
 gulp.task('build', ['first_round'], function() {
     gulp.src('./.tmp/**/*.html')
-        .pipe(usemin({
-             css: [minifyCss(), 'concat', rev()],
-             html: [minifyHtml({empty: true})],
-             js: [uglify(), rev()]
+        .pipe($.usemin({
+             css: [$.minifyCss(), 'concat', $.rev()],
+             html: [$.minifyHtml({empty: true})],
+             js: [$.uglify(), $.rev()]
         }))
         .pipe(gulp.dest('./dist/'));
-);
+});
