@@ -30,6 +30,7 @@ gulp.task('compass', ['bower', 'clean'], function() {
 gulp.task('scss', ['bower', 'clean'], function(){
     return gulp.src('./app/**/*.scss')
                .pipe($.sass())
+               .on('error', $.util.log)
                .pipe(gulp.dest('./.tmp'));
 });
 
