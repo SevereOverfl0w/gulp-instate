@@ -16,16 +16,16 @@ gulp.task('html', ['bower', 'clean'], function() {
         .pipe($.connect.reload());
 });
 
-//gulp.task('compass', ['bower', 'clean'], function() {
-//    return gulp.src('./app/**/*.scss')
-//        .pipe($.compass({
-//            css: 'app/styles',
-//            sass: 'app/styles',
-//            image: 'app/images'
-//        }))
-//        .on('error', $.util.log)
-//        .pipe(gulp.dest('./.tmp'));
-//});
+gulp.task('compass', ['bower', 'clean'], function() {
+    return gulp.src('./app/**/*.scss')
+        .pipe($.compass({
+            css: 'app/styles',
+            sass: 'app/styles',
+            image: 'app/images'
+        }))
+        .on('error', $.util.log)
+        .pipe(gulp.dest('./.tmp'));
+});
 
 gulp.task('scss', ['bower', 'clean'], function(){
     return gulp.src('./app/**/*.scss')
