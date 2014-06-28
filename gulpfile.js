@@ -100,7 +100,12 @@ gulp.task('build', ['first_round'], function() {
         .pipe(gulp.dest('./dist/'));
 });
 
-gulp.task('deploy', ['build'], function(){
+gulp.task('copycname', ['build', 'clean'], function(){
+    return gulp.src('./CNAME')
+        .pipe(gulp.dest('./dist/'))
+});
+
+gulp.task('deploy', ['build', 'copycname'], function(){
      gulp.src('./dist/**/*')
          .pipe($.ghPages());
 });
