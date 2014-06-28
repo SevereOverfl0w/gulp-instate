@@ -1,5 +1,4 @@
-var gulp = require('gulp'),
-    $ = require('gulp-load-plugins')(),
+var gulp = require('gulp'), $ = require('gulp-load-plugins')(),
     wiredep = require('wiredep').stream,
     pngcrush = require('imagemin-pngcrush');
 
@@ -99,4 +98,9 @@ gulp.task('build', ['first_round'], function() {
             use: [pngcrush()]
         }))
         .pipe(gulp.dest('./dist/'));
+});
+
+gulp.task('deploy', ['build'], function(){
+     gulp.src('./dist/**/*')
+         .pipe($.ghPages());
 });
