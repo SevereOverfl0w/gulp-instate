@@ -16,15 +16,21 @@ gulp.task('html', ['bower', 'clean'], function() {
         .pipe($.connect.reload());
 });
 
-gulp.task('compass', ['bower', 'clean'], function() {
+//gulp.task('compass', ['bower', 'clean'], function() {
+//    return gulp.src('./app/**/*.scss')
+//        .pipe($.compass({
+//            css: 'app/styles',
+//            sass: 'app/styles',
+//            image: 'app/images'
+//        }))
+//        .on('error', $.util.log)
+//        .pipe(gulp.dest('./.tmp'));
+//});
+
+gulp.task('scss', ['bower', 'clean'], function(){
     return gulp.src('./app/**/*.scss')
-        .pipe($.compass({
-            css: 'app/styles',
-            sass: 'app/styles',
-            image: 'app/images'
-        }))
-        .on('error', $.util.log)
-        .pipe(gulp.dest('./.tmp'));
+               .pipe($.sass())
+               .pipe(gulp.dest('./.tmp'));
 });
 
 gulp.task('css', function() {
@@ -59,7 +65,7 @@ gulp.task('copy', ['clean'], function(){
 
 gulp.task('watch', function() {
     gulp.watch(['./app/**/*.html'], ['html']);
-    gulp.watch(['./app/**/*.scss'], ['compass']);
+    gulp.watch(['./app/**/*.scss'], ['scss']);
     gulp.watch(['./.tmp/**/*.css'], ['css']);
     gulp.watch(['./app/**/*.coffee'], ['coffee']);
     gulp.watch(['./.tmp/**/*.js'], ['js']);
@@ -73,7 +79,7 @@ gulp.task('clean', function() {
                .pipe($.clean());
 });
 
-gulp.task('first_round', ['bower', 'copy', 'html', 'compass', 'coffee']);
+gulp.task('first_round', ['bower', 'copy', 'html', 'scss', 'coffee']);
 
 gulp.task('default', ['connect', 'first_round', 'watch']);
 
