@@ -1,21 +1,21 @@
-var gulp = require('gulp'), $ = require('gulp-load-plugins')(),
+var gulp = require('gulp'),
+    $ = require('gulp-load-plugins')(),
     wiredep = require('wiredep').stream,
-    pngcrush = require('imagemin-pngcrush');
+    pngcrush = require('imagemin-pngcrush'),
+    runSequence = require('run-sequence'); 
 
-gulp.task('connect', function() {
-    $.connect.server({
-        root: './.tmp',
-        livereload: true,
-    });
+gulp.task('connect', function(next) {
+    var connect = require('connect'),
+        server = connect();
+    server.use(connect.static('./.tmp')).listen(process.env.PORT || 8080, next);
 });
 
-gulp.task('html', ['bower', 'clean'], function() {
+gulp.task('html', function() {
     return gulp.src('./app/**/*.html')
         .pipe(gulp.dest('./.tmp'))
-        .pipe($.connect.reload());
 });
 
-gulp.task('compass', ['bower', 'clean'], function() {
+gulp.task('compass', function() {
     return gulp.src('./app/**/*.scss')
         .pipe($.compass({
             css: 'app/styles',
@@ -26,7 +26,7 @@ gulp.task('compass', ['bower', 'clean'], function() {
         .pipe(gulp.dest('./.tmp'));
 });
 
-gulp.task('scss', ['bower', 'clean'], function(){
+gulp.task('scss', function(){
     return gulp.src('./app/**/*.scss')
                .pipe($.sass())
                .on('error', $.util.log)
@@ -37,10 +37,9 @@ gulp.task('css', function() {
     gulp.src('./.tmp/**/*.css')
         .pipe($.autoprefixer())
         .pipe(gulp.dest('./.tmp'))
-        .pipe($.connect.reload());
 });
 
-gulp.task('coffee', ['clean'], function() {
+gulp.task('coffee', function() {
     return gulp.src('./app/**/*.coffee')
         .pipe($.coffee({bare: true}))
         .on('error', $.util.log)
@@ -49,7 +48,6 @@ gulp.task('coffee', ['clean'], function() {
 
 gulp.task('js', function() {
     gulp.src('./.tmp/**/*.js')
-        .pipe($.connect.reload());
 });
 
 gulp.task('bower', function() {
@@ -58,7 +56,7 @@ gulp.task('bower', function() {
         .pipe(gulp.dest('./app/'));
 });
 
-gulp.task('copy', ['clean'], function(){
+gulp.task('copy', function(){
     return gulp.src(['./app/**/*.{png,jpeg,jpg,svg,js,css}'])
                .pipe(gulp.dest('./.tmp'));
 });
@@ -71,27 +69,38 @@ gulp.task('watch', function() {
     gulp.watch(['./.tmp/**/*.js'], ['js']);
     gulp.watch(['./app/**/*.{png,jpeg,jpg,svg,js,css}'], ['copy']);
 
+    $.livereload.listen();
+    gulp.watch(['.tmp/**'], $.livereload.changed);
+
     gulp.watch(['./bower.json'], ['bower']);
 });
 
 gulp.task('clean', function() {
     return gulp.src('{.tmp,dist}', {read: false})
-               .pipe($.clean());
+               .pipe($.clean())
+               .on('error', $.util.log);
 });
 
-gulp.task('first_round', ['bower', 'copy', 'html', 'scss', 'coffee']);
+gulp.task('first_round', function(cb){
+    runSequence('clean', ['bower', 'copy', 'html', 'scss', 'coffee'], cb);
+});
 
-gulp.task('default', ['connect', 'first_round', 'watch']);
+gulp.task('default', function(cb){
+    runSequence('first_round', ['connect', 'watch'], cb);
+});
 
-gulp.task('build', ['first_round'], function() {
-    gulp.src('./.tmp/**/*.html')
+gulp.task('htmlmin', ['first_round'], function() {
+    return gulp.src('./.tmp/**/*.html')
         .pipe($.usemin({
              css: [$.minifyCss(), 'concat', $.rev()],
              html: [$.minifyHtml({empty: true})],
              js: [$.uglify(), $.rev()]
         }))
         .pipe(gulp.dest('./dist/'));
-    gulp.src('./.tmp/**/*.{svg,png,jpg,jpeg,gif}')
+});
+
+gulp.task('imagemin', ['first_round'], function() {
+    return gulp.src('./.tmp/**/*.{svg,png,jpg,jpeg,gif}')
         .pipe($.imagemin({
             progressive: true,
             svgoPlugins: [{removeViewBox: false}],
@@ -100,7 +109,10 @@ gulp.task('build', ['first_round'], function() {
         .pipe(gulp.dest('./dist/'));
 });
 
-gulp.task('copycname', ['build', 'clean'], function(){
+gulp.task('build', ['htmlmin', 'imagemin']);
+
+
+gulp.task('copycname', ['build'], function(){
     return gulp.src('./CNAME')
         .pipe(gulp.dest('./dist/'))
 });
